@@ -20,7 +20,7 @@ Regular Expressions
 
   
 
-*  [**Gabe Timm**](gabetimm.com)
+*  [**Gabe Timm**](http://gabetimm.com)
 
 
 ## Acknowledgments
