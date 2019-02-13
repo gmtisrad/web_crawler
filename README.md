@@ -20,9 +20,8 @@ Regular Expressions
 
   
 
-*  **Gabe Timm** - [Website](gabetimm.com)
+*  [**Gabe Timm**] - (gabetimm.com)
 
-  
 
 ## Acknowledgments
 
