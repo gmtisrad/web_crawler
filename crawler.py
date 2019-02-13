@@ -15,13 +15,13 @@ class WebCrawler(object):
     def __init__(self, url, maxDepth):
         self.MAX_DEPTH = maxDepth
         self.BASE_DEPTH = 0
-        self.BASE_PAGE = WebPage(url, self.BASE_DEPTH, self.MAX_DEPTH)
         self.BASE_URL = url
         self.linkIndex = set()
+        self.BASE_PAGE = WebPage(url, self.BASE_DEPTH, self.MAX_DEPTH, self.linkIndex)
     
     def crawl(self, url, depth):
-        page = WebPage(url, depth+1, self.MAX_DEPTH)
-        newLinks = page.links - self.linkIndex
+        page = WebPage(url, depth+1, self.MAX_DEPTH, self.linkIndex)
+        newLinks = page.links
 
         for nestedLink in newLinks:
             if nestedLink != url:
@@ -33,7 +33,7 @@ class WebCrawler(object):
         startTime = time.time()
         linkIndexCopy = self.BASE_PAGE.links.copy()
 
-        threads = [Thread(target = self.crawl, args = (link, self.BASE_DEPTH,)) for link in linkIndexCopy]
+        threads = [Thread(target = self.crawl, args = (link, self.BASE_DEPTH,)) for link in self.BASE_PAGE.links]
 
         for thread in threads:
             thread.start()
@@ -49,13 +49,14 @@ class WebCrawler(object):
         
         
 class WebPage(object):
-    def __init__(self, url, depth, maxDepth):
+    def __init__(self, url, depth, maxDepth, linkIndex):
         self.ASSET_FLAG = args.assets[0]
         self.MAX_DEPTH = maxDepth
         self.depth = depth
         self.links = set()
-        self.getPageLinks(url)
         self.size = None
+        self.linkIndex = linkIndex
+        self.getPageLinks(url)
 
     def getPageLinks(self, url):
         pattern = '(?:(?:https?|ftp):\/\/|\b(?:[a-z\d]+\.))(?:(?:[^\s()<>]+|\((?:[^\s()<>]+|(?:\([^\s()<>]+\)))?\))+(?:\((?:[^\s()<>]+|(?:\(?:[^\s()<>]+\)))?\)|[^\s`!()\[\]{};:\'".,<>?«»“”‘’]))?'
@@ -94,8 +95,8 @@ class WebPage(object):
                 self.links.add(link)
 
         print('\nLink: %s \nDepth: %d \nSize: %d\n'%(url, self.depth, len(html)))
-
-        return self.links
+            
+        return (self.links.difference(self.linkIndex))
 
 if __name__ == '__main__':
     crawler = WebCrawler(str(args.url[0]), args.depth[0])
