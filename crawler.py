@@ -20,21 +20,20 @@ class WebCrawler(object):
         self.BASE_PAGE = WebPage(url, self.BASE_DEPTH, self.MAX_DEPTH, self.linkIndex)
     
     def crawl(self, url, depth):
-        page = WebPage(url, depth+1, self.MAX_DEPTH, self.linkIndex)
-        newLinks = page.links - self.linkIndex
+        page = WebPage(url, depth, self.MAX_DEPTH, self.linkIndex)
 
-        for nestedLink in newLinks:
-            if nestedLink != url:
+        for nestedLink in page.links:
+            if nestedLink != url and nestedLink not in self.linkIndex:
                 self.linkIndex.add(nestedLink)       
-                self.crawl(nestedLink, page.depth)
+                self.crawl(nestedLink, page.depth+1)
     
     def startCrawl(self):
         self.linkIndex = self.BASE_PAGE.links
         startTime = time.time()
-
+        
         threads = []
         for link in self.BASE_PAGE.links:
-            threads.append(Thread(target = self.crawl, args = (link, self.BASE_DEPTH,)))
+            threads.append(Thread(target = self.crawl, args = (link, self.BASE_DEPTH + 1,)))
 
         for thread in threads:
             thread.start()
@@ -74,19 +73,20 @@ class WebPage(object):
         soup = BeautifulSoup(html, 'html.parser')
 
         #If ASSET_FLAG false, only parse urls within an anchor tag
-        if 0 == self.ASSET_FLAG and self.depth < self.MAX_DEPTH:
-            linkSoup = soup('a', href=True)
+        if 0 == self.ASSET_FLAG:
+            if self.depth < self.MAX_DEPTH:
+                linkSoup = soup('a')
 
-            #Converts anchor tags to urls
-            linkSoup = re.findall(pattern, str(linkSoup))
+                #Converts anchor tags to urls
+                linkSoup = re.findall(pattern, str(linkSoup))
 
-            for link in linkSoup:
-                #Adds propper formatting for urllib to work
-                if link not in self.linkIndex:
-                    if -1 == link.find('http') and link and link != url:
-                        self.links.add(str('http://' + link))
-                    elif link and link != url:
-                        self.links.add(link)
+                for link in linkSoup:
+                    #Adds propper formatting for urllib to work
+                    if link not in self.linkIndex:
+                        if -1 == link.find('http') and link and link != url:
+                            self.links.add(str('http://' + link))
+                        elif link and link != url:
+                            self.links.add(link)
         
         #If ASSET_FLAG true, parse all links
         elif 1 == self.ASSET_FLAG and self.depth < self.MAX_DEPTH:
