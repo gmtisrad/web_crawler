@@ -31,9 +31,7 @@ class WebCrawler(object):
         self.linkIndex = self.BASE_PAGE.links
         startTime = time.time()
 
-        threads = []
-        for link in self.BASE_PAGE.links:
-            threads.append(Thread(target = self.crawl, args = (link, self.BASE_DEPTH + 1,)))
+        threads = [Thread(target = self.crawl, args = (link, self.BASE_DEPTH + 1)) for link in self.BASE_PAGE.links]
 
         for thread in threads:
             thread.start()
