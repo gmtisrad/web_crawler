@@ -30,7 +30,7 @@ class WebCrawler(object):
     def startCrawl(self):
         self.linkIndex = self.BASE_PAGE.links
         startTime = time.time()
-        
+
         threads = []
         for link in self.BASE_PAGE.links:
             threads.append(Thread(target = self.crawl, args = (link, self.BASE_DEPTH + 1,)))
@@ -40,12 +40,8 @@ class WebCrawler(object):
         for thread in threads:
             thread.join()
 
-
         print ('Crawl completed after %ds' %(time.time() - startTime))
 
-
-        
-        
 class WebPage(object):
     def __init__(self, url, depth, maxDepth, linkIndex):
         self.ASSET_FLAG = args.assets[0]
